@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import static java.util.Collections.*;
 
-public class MapModule implements Module {
+public class MapModule extends AbstractModule {
 	private final Map<ModuleEntry, Collection<Map<String, String>>> collections;
 	private final Map<ModuleList, List<String>> lists;
 	private final Map<ModuleProperty, String> properties;

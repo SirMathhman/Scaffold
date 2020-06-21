@@ -8,7 +8,7 @@ import java.util.stream.IntStream;
 
 import static java.text.MessageFormat.format;
 
-public class JsonModule implements Module {
+public class JsonModule extends AbstractModule {
 	private final JsonNode root;
 
 	public JsonModule(JsonNode root) {
