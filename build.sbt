@@ -4,6 +4,8 @@ version := "0.1"
 
 scalaVersion := "2.13.2"
 
+mainClass in (Compile, run) := Some("com.meti.Main")
+
 // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
 libraryDependencies += "com.fasterxml.jackson.core" % "jackson-core" % "2.+"
 
