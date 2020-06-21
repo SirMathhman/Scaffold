@@ -30,7 +30,7 @@ public class Main {
 		else install(path);
 	}
 
-	private boolean hasBeenCreated(Path path) {
+	private static boolean hasBeenCreated(Path path) {
 		if (Files.exists(path)) return false;
 		try {
 			createTemplate(path);
