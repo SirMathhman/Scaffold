@@ -16,7 +16,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import static com.meti.module.ModuleCollection.*;
+import static com.meti.module.ModuleEntry.*;
+import static com.meti.module.ModuleList.INSTALL;
 import static com.meti.module.ModuleProperty.GROUP;
 import static com.meti.module.ModuleProperty.NAME;
 import static java.text.MessageFormat.format;
@@ -132,7 +133,7 @@ public class PathModuleInstaller implements ModuleInstaller {
 		Path child = formatPath(module, name);
 		transferContents(module, child);
 		installDependencies(module, source);
-		Collection<?> commands = module.getCollection(INSTALL);
+		Collection<?> commands = module.getList(INSTALL);
 		Collection<String> items = new ArrayList<>();
 		for (Object command : commands) {
 			ByteArrayOutputStream outputStream = execute((String) command);

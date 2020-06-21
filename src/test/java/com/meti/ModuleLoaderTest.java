@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.meti.module.ModuleCollection.DEPENDENCIES;
-import static com.meti.module.ModuleCollection.INSTALL;
+import static com.meti.module.ModuleEntry.DEPENDENCIES;
+import static com.meti.module.ModuleList.INSTALL;
 import static com.meti.module.ModuleProperty.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,7 +26,7 @@ public class ModuleLoaderTest {
 			assertEquals("0.1", module.getProperty(VERSION).orElseThrow());
 			assertEquals("A description", module.getProperty(DESCRIPTION).orElseThrow());
 			assertFalse(module.hasCollection(DEPENDENCIES));
-			assertFalse(module.hasCollection(INSTALL));
+			assertFalse(module.hasList(INSTALL));
 		}
 	}
 }

@@ -1,8 +1,8 @@
 package com.meti;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.meti.module.*;
 import com.meti.module.Module;
+import com.meti.module.*;
 import com.meti.source.PathModuleInstaller;
 import com.meti.source.URLSourceFactory;
 import org.junit.jupiter.api.AfterAll;
@@ -12,9 +12,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.stream.Stream;
 
-import static com.meti.module.ModuleCollection.*;
+import static com.meti.module.ModuleEntry.CONTENT;
+import static com.meti.module.ModuleEntry.DEPENDENCIES;
+import static com.meti.module.ModuleList.INSTALL;
 import static com.meti.module.ModuleProperty.NAME;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,10 +58,8 @@ class PathModuleInstallerTest {
 		ObjectMapper mapper = new ObjectMapper();
 		Module module = MapModuleBuilder.create()
 				.append(NAME, "moduleName")
-				.append(CONTENT, "https://pastebin.com/raw/BWSEMbQz")
-				.append(DEPENDENCIES, mapper.createObjectNode()
-						.put("type", "url")
-						.put("value", "https://pastebin.com/raw/M87c5DNr"))
+				.append(CONTENT, Map.of("type", "url", "value", "https://pastebin.com/raw/BWSEMbQz"))
+				.append(DEPENDENCIES, Map.of("type", "url", "value", "https://pastebin.com/raw/M87c5DNr"))
 				.append(INSTALL, "cmd /c echo Hello World!")
 				.build();
 		String output = installer.install(module, new JsonModuleLoader(mapper));

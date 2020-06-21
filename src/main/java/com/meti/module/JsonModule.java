@@ -16,13 +16,30 @@ public class JsonModule implements Module {
 	}
 
 	@Override
-	public Collection<Map<String, String>> getCollection(ModuleCollection content) {
+	public Collection<Map<String, String>> getCollection(ModuleEntry content) {
 		String collectionName = content.name();
 		String formattedName = collectionName.toLowerCase(Locale.ENGLISH);
 		JsonNode collectionNode = root.get(formattedName);
 		return null == collectionNode ?
 				Collections.emptySet() :
 				convertChildrenToCheckedMaps(collectionNode);
+	}
+
+	@Override
+	public Collection<String> getList(ModuleList list) {
+		String listName = list.name();
+		String formattedName = listName.toLowerCase(Locale.ENGLISH);
+		JsonNode collectionNode = root.get(formattedName);
+		return null == collectionNode ?
+				Collections.emptySet() :
+				convertChildrenToList(collectionNode);
+	}
+
+	private static List<String> convertChildrenToList(JsonNode parent) {
+		return IntStream.range(0, parent.size())
+				.mapToObj(parent::get)
+				.map(JsonNode::asText)
+				.collect(Collectors.toList());
 	}
 
 	private static List<Map<String, String>> convertChildrenToCheckedMaps(JsonNode parent) {
@@ -86,8 +103,16 @@ public class JsonModule implements Module {
 	}
 
 	@Override
-	public boolean hasCollection(ModuleCollection collection) {
+	public boolean hasCollection(ModuleEntry collection) {
 		String name = collection.name();
+		String formattedName = name.toLowerCase(Locale.ENGLISH);
+		JsonNode node = root.get(formattedName);
+		return null != node && !node.isEmpty();
+	}
+
+	@Override
+	public boolean hasList(ModuleList list) {
+		String name = list.name();
 		String formattedName = name.toLowerCase(Locale.ENGLISH);
 		JsonNode node = root.get(formattedName);
 		return null != node && !node.isEmpty();
