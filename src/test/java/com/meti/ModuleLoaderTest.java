@@ -1,14 +1,16 @@
 package com.meti;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meti.module.JsonModuleLoader;
+import com.meti.module.Module;
+import com.meti.module.ModuleLoader;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.meti.ModuleCollection.DEPENDENCIES;
-import static com.meti.ModuleCollection.INSTALL;
-import static com.meti.ModuleProperty.*;
+import static com.meti.module.ModuleCollection.DEPENDENCIES;
+import static com.meti.module.ModuleCollection.INSTALL;
+import static com.meti.module.ModuleProperty.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ModuleLoaderTest {

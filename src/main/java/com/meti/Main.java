@@ -1,6 +1,12 @@
 package com.meti;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meti.module.*;
+import com.meti.module.Module;
+import com.meti.source.PathModuleInstaller;
+import com.meti.source.PathSourceFactory;
+import com.meti.source.SourceFactory;
+import com.meti.source.URLSourceFactory;
 
 import java.io.IOException;
 import java.io.InputStream;

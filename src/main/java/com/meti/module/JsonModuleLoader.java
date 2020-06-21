@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

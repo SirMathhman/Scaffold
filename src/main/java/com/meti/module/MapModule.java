@@ -1,4 +1,8 @@
-package com.meti;
+package com.meti.module;
+
+import com.meti.module.Module;
+import com.meti.module.ModuleCollection;
+import com.meti.module.ModuleProperty;
 
 import java.util.Collection;
 import java.util.Map;

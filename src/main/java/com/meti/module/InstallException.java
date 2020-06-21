@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.module;
 
 public class InstallException extends Exception {
 	public InstallException(String message, Throwable cause) {

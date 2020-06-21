@@ -1,6 +1,10 @@
 package com.meti;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meti.module.*;
+import com.meti.module.Module;
+import com.meti.source.PathModuleInstaller;
+import com.meti.source.URLSourceFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
@@ -10,8 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-import static com.meti.ModuleCollection.*;
-import static com.meti.ModuleProperty.NAME;
+import static com.meti.module.ModuleCollection.*;
+import static com.meti.module.ModuleProperty.NAME;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.*;
 

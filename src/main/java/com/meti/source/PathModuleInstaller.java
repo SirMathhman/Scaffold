@@ -1,6 +1,8 @@
-package com.meti;
+package com.meti.source;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.meti.module.*;
+import com.meti.module.Module;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,9 +16,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import static com.meti.ModuleCollection.*;
-import static com.meti.ModuleProperty.GROUP;
-import static com.meti.ModuleProperty.NAME;
+import static com.meti.module.ModuleCollection.*;
+import static com.meti.module.ModuleProperty.GROUP;
+import static com.meti.module.ModuleProperty.NAME;
 import static java.text.MessageFormat.format;
 
 public class PathModuleInstaller implements ModuleInstaller {

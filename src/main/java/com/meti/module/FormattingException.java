@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.module;
 
 public class FormattingException extends RuntimeException {
 	public FormattingException(String message) {

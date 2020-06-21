@@ -1,4 +1,4 @@
-package com.meti;
+package com.meti.module;
 
 public interface ModuleBuilder {
 	ModuleBuilder append(ModuleProperty property, String value);
