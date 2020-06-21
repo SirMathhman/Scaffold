@@ -1,9 +1,6 @@
 package com.meti.module;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.meti.module.Module;
-import com.meti.module.ModuleCollection;
-import com.meti.module.ModuleProperty;
 
 import java.util.*;
 
@@ -19,7 +16,7 @@ public class JsonModule implements Module {
 		String name = content.name();
 		String formattedName = name.toLowerCase(Locale.ENGLISH);
 		JsonNode node = value.get(formattedName);
-		if (node == null) return Collections.emptySet();
+		if (null == node) return Collections.emptySet();
 		Collection<Object> toReturn = new ArrayList<>();
 		for (int i = 0; i < node.size(); i++) {
 			JsonNode child = node.get(i);
