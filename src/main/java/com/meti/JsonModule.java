@@ -12,14 +12,19 @@ public class JsonModule implements Module {
 	}
 
 	@Override
-	public Collection<String> getCollection(ModuleCollection content) {
+	public Collection<?> getCollection(ModuleCollection content) {
 		String name = content.name();
 		String formattedName = name.toLowerCase(Locale.ENGLISH);
 		JsonNode node = value.get(formattedName);
 		if (node == null) return Collections.emptySet();
-		Collection<String> toReturn = new ArrayList<>();
+		Collection<Object> toReturn = new ArrayList<>();
 		for (int i = 0; i < node.size(); i++) {
-			toReturn.add(node.get(i).asText());
+			JsonNode child = node.get(i);
+			if (child.isTextual()) {
+				toReturn.add(child.asText());
+			} else {
+				toReturn.add(child);
+			}
 		}
 		return toReturn;
 	}

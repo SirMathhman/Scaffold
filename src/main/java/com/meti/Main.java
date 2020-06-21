@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,7 +17,10 @@ public class Main {
 	private static final Logger logger = Logger.getLogger("Scaffold");
 	private final ObjectMapper mapper = new ObjectMapper();
 	private final ModuleLoader loader = new JsonModuleLoader(mapper);
-	private final SourceFactory sourceFactory = new URLSourceFactory();
+	private final Map<String, SourceFactory> sourceFactory = Map.of(
+			"path", new PathSourceFactory(),
+			"url", new URLSourceFactory()
+	);
 	private final ModuleInstaller installer = new PathModuleInstaller(modules, sourceFactory);
 
 	public static void main(String[] args) {

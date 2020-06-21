@@ -9,7 +9,7 @@ public class URLSourceFactory implements SourceFactory {
 		try {
 			return new URLSource(new URL(value));
 		} catch (MalformedURLException e) {
-			throw new InstallException("Failed to construct source.", e);
+			throw new InstallException("Failed to construct source for " + value, e);
 		}
 	}
 }

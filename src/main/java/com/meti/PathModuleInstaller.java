@@ -1,5 +1,7 @@
 package com.meti;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 import static com.meti.ModuleCollection.*;
 import static com.meti.ModuleProperty.GROUP;
@@ -17,11 +21,11 @@ import static java.text.MessageFormat.format;
 
 public class PathModuleInstaller implements ModuleInstaller {
 	private final Path directory;
-	private final SourceFactory sourceFactory;
+	private final Map<String, SourceFactory> sourceFactories;
 
-	public PathModuleInstaller(Path directory, SourceFactory sourceFactory) {
+	public PathModuleInstaller(Path directory, Map<String, SourceFactory> sourceFactories) {
 		this.directory = directory;
-		this.sourceFactory = sourceFactory;
+		this.sourceFactories = Collections.unmodifiableMap(sourceFactories);
 	}
 
 	private static void createProcess(String command, ByteArrayOutputStream outputStream,
@@ -102,14 +106,17 @@ public class PathModuleInstaller implements ModuleInstaller {
 	}
 
 	private void installDependencies(Module module, ModuleLoader source) throws InstallException {
-		Collection<String> dependencies = module.getCollection(DEPENDENCIES);
-		for (String dependency : dependencies) {
-			installDependency(source, dependency);
+		Collection<?> dependencies = module.getCollection(DEPENDENCIES);
+		for (Object dependency : dependencies) {
+			JsonNode node = (JsonNode) dependency;
+			installDependency(source, node);
 		}
 	}
 
-	private void installDependency(ModuleLoader loader, String dependency) throws InstallException {
-		try (Source source = sourceFactory.from(dependency)) {
+	private void installDependency(ModuleLoader loader, JsonNode dependency) throws InstallException {
+		String type = dependency.get("type").asText();
+		String value = dependency.get("value").asText();
+		try (Source source = sourceFactories.get(type).from(value)) {
 			Module dependencyModule = loader.load(source.open());
 			install(dependencyModule, loader);
 		} catch (MalformedURLException e) {
@@ -123,10 +130,10 @@ public class PathModuleInstaller implements ModuleInstaller {
 		Path child = formatPath(module, name);
 		transferContents(module, child);
 		installDependencies(module, source);
-		Collection<String> commands = module.getCollection(INSTALL);
+		Collection<?> commands = module.getCollection(INSTALL);
 		Collection<String> items = new ArrayList<>();
-		for (String command : commands) {
-			ByteArrayOutputStream outputStream = execute(command);
+		for (Object command : commands) {
+			ByteArrayOutputStream outputStream = execute((String) command);
 			String outputString = outputStream.toString();
 			if (!outputString.isBlank()) items.add(outputString);
 		}
@@ -141,8 +148,11 @@ public class PathModuleInstaller implements ModuleInstaller {
 		throw new FormattingException(format("A module at {0} already exists.", other.toAbsolutePath()));
 	}
 
-	private void transferContentToPath(Path child, String content) throws InstallException {
-		try (Source source = sourceFactory.from(content)) {
+	private void transferContentToPath(Path child, Object content) throws InstallException {
+		JsonNode node = (JsonNode) content;
+		String type = node.get("type").asText();
+		String value = node.get("value").asText();
+		try (Source source = sourceFactories.get(type).from(value)) {
 			transferSourceToPath(source, child);
 		} catch (IOException e) {
 			throw new InstallException(format("Failed to open {0}.", content), e);
@@ -150,8 +160,8 @@ public class PathModuleInstaller implements ModuleInstaller {
 	}
 
 	private void transferContents(Module module, Path child) throws InstallException {
-		Collection<String> contents = module.getCollection(CONTENT);
-		for (String content : contents) {
+		Collection<?> contents = module.getCollection(CONTENT);
+		for (Object content : contents) {
 			transferContentToPath(child, content);
 		}
 	}

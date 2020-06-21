@@ -6,7 +6,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public class MapModuleBuilder implements ModuleBuilder {
-	private final Map<ModuleCollection, Collection<String>> collections = new EnumMap<>(ModuleCollection.class);
+	private final Map<ModuleCollection, Collection<Object>> collections = new EnumMap<>(ModuleCollection.class);
 	private final Map<ModuleProperty, String> properties = new EnumMap<>(ModuleProperty.class);
 
 	public static ModuleBuilder create() {
@@ -22,7 +22,7 @@ public class MapModuleBuilder implements ModuleBuilder {
 	}
 
 	@Override
-	public ModuleBuilder append(ModuleCollection collection, String value) {
+	public ModuleBuilder append(ModuleCollection collection, Object value) {
 		if (!collections.containsKey(collection)) collections.put(collection, new ArrayList<>());
 		collections.get(collection).add(value);
 		return this;

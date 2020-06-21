@@ -1,5 +1,6 @@
 package com.meti;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
@@ -11,11 +12,13 @@ import java.util.stream.Stream;
 
 import static com.meti.ModuleCollection.*;
 import static com.meti.ModuleProperty.NAME;
+import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PathModuleInstallerTest {
 	public static final Path DIRECTORY = Paths.get(".", "test");
-	private final ModuleInstaller installer = new PathModuleInstaller(DIRECTORY, new URLSourceFactory());
+	private final ModuleInstaller installer = new PathModuleInstaller(DIRECTORY, singletonMap("url",
+			new URLSourceFactory()));
 
 	@AfterAll
 	static void cleanup() throws IOException {
@@ -45,13 +48,16 @@ class PathModuleInstallerTest {
 
 	@Test
 	void install() throws InstallException {
+		ObjectMapper mapper = new ObjectMapper();
 		Module module = MapModuleBuilder.create()
 				.append(NAME, "moduleName")
 				.append(CONTENT, "https://pastebin.com/raw/BWSEMbQz")
-				.append(DEPENDENCIES, "https://pastebin.com/raw/M87c5DNr")
+				.append(DEPENDENCIES, mapper.createObjectNode()
+						.put("type", "url")
+						.put("value", "https://pastebin.com/raw/M87c5DNr"))
 				.append(INSTALL, "cmd /c echo Hello World!")
 				.build();
-		String output = installer.install(module, new JsonModuleLoader());
+		String output = installer.install(module, new JsonModuleLoader(mapper));
 		assertTrue(Files.exists(Paths.get(".", "test", "moduleName", "raw", "BWSEMbQz")));
 		assertTrue(Files.exists(Paths.get(".", "test", "test", "raw", "cXA7eYpG")));
 		assertEquals(String.format("Hello World!%s", System.lineSeparator()), output);

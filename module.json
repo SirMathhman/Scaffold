@@ -3,7 +3,13 @@
   "name": "scaffold",
   "version": "0.1",
   "description": "Hopefully the simplest package manager to exist.",
-  "content": [],
-  "dependencies": [],
+  "content": [
+    {
+      "type": "path",
+      "value": "out\\artifacts\\Scaffold_jar\\Scaffold.jar"
+    }
+  ],
+  "dependencies": [
+  ],
   "install": []
 }

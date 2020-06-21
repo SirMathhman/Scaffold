@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface Module {
-	Collection<String> getCollection(ModuleCollection content);
+	Collection<?> getCollection(ModuleCollection content);
 
 	Optional<String> getProperty(ModuleProperty propertyName);
 

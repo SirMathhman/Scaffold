@@ -7,16 +7,16 @@ import java.util.Optional;
 import static java.util.Collections.*;
 
 public class MapModule implements Module {
-	private final Map<ModuleCollection, Collection<String>> collections;
+	private final Map<ModuleCollection, Collection<Object>> collections;
 	private final Map<ModuleProperty, String> properties;
 
-	public MapModule(Map<ModuleProperty, String> properties, Map<ModuleCollection, Collection<String>> collections) {
+	public MapModule(Map<ModuleProperty, String> properties, Map<ModuleCollection, Collection<Object>> collections) {
 		this.properties = unmodifiableMap(properties);
 		this.collections = unmodifiableMap(collections);
 	}
 
 	@Override
-	public Collection<String> getCollection(ModuleCollection content) {
+	public Collection<?> getCollection(ModuleCollection content) {
 		return collections.containsKey(content) ?
 				unmodifiableCollection(collections.get(content)) :
 				emptySet();
