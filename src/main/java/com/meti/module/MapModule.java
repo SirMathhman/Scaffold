@@ -1,9 +1,5 @@
 package com.meti.module;
 
-import com.meti.module.Module;
-import com.meti.module.ModuleCollection;
-import com.meti.module.ModuleProperty;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -20,7 +16,7 @@ public class MapModule implements Module {
 	}
 
 	@Override
-	public Collection<?> getCollection(ModuleCollection content) {
+	public Collection<Map<String, String>> getCollection(ModuleCollection content) {
 		return collections.containsKey(content) ?
 				unmodifiableCollection(collections.get(content)) :
 				emptySet();
