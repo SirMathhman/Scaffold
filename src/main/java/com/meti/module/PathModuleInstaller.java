@@ -26,7 +26,7 @@ import static com.meti.module.ModuleProperty.NAME;
 import static java.text.MessageFormat.format;
 
 public class PathModuleInstaller implements ModuleInstaller {
-	private static final Logger logger = Logger.getLogger("Install");
+	private static final Logger logger = Logger.getLogger("Scaffold");
 	private final Path directory;
 	private final Map<String, SourceFactory> sourceFactories;
 
