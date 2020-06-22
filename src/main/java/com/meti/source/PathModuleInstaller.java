@@ -151,10 +151,20 @@ public class PathModuleInstaller implements ModuleInstaller {
 		throw new FormattingException(format("A module at {0} already exists.", other.toAbsolutePath()));
 	}
 
+	private static String castAsString(Object value) {
+		if(value instanceof String) {
+			return value.toString();
+		} else {
+			throw new IllegalArgumentException(String.format("%s is not a string.", value));
+		}
+	}
+
 	private void transferContentToPath(Path child, Object content) throws InstallException {
-		JsonNode node = (JsonNode) content;
-		String type = node.get("type").asText();
-		String value = node.get("value").asText();
+		Map<?, ?> node = (Map<?, ?>) content;
+		Object typeObject = node.get("type");
+		Object valueObject = node.get("value");
+		String type = castAsString(typeObject);
+		String value = castAsString(valueObject);
 		try (Source source = sourceFactories.get(type).from(value)) {
 			transferSourceToPath(source, child);
 		} catch (IOException e) {
