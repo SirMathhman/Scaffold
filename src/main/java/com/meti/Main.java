@@ -3,7 +3,6 @@ package com.meti;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meti.module.Module;
 import com.meti.module.*;
-import com.meti.module.PathModuleInstaller;
 import com.meti.source.PathSourceFactory;
 import com.meti.source.SourceFactory;
 import com.meti.source.URLSourceFactory;
@@ -43,31 +42,36 @@ public class Main {
 	);
 	private final ModuleInstaller installer = new PathModuleInstaller(modules, sourceFactory);
 
-	private static Stream<Path> list(Path path) {
-		Stream<Path> stream = null;
+	private static void createTemplate(Path path) throws IOException {
+		String separator = System.lineSeparator();
+		String formattedTemplate = MessageFormat.format(TEMPLATE, separator);
+		Files.createFile(path);
+		Files.writeString(path, formattedTemplate);
+	}
+
+	private static void deleteLogged(Path path) {
 		try {
-			stream = Files.list(path);
+			Files.deleteIfExists(path);
 		} catch (IOException e) {
-			logger.log(Level.WARNING, "Failed to find children of " + path, e);
+			logger.log(Level.WARNING, "Failed to delete " + path, e);
 		}
-		return stream;
 	}
 
-	public static void main(String[] args) {
-		new Main().run();
+	private static void deletePrevious() {
+		logger.log(Level.INFO, "Deleting previous installed content.");
+		deleteRecursively(MODULES);
+		logger.log(Level.FINE, "Finished deleting previous content.");
 	}
 
-	private void run() {
-		deletePrevious();
-
-		Path path = Paths.get(".", "module.json");
-		if (hasBeenCreated(path)) {
-			logger.log(Level.WARNING, "The template for module.json has been created " +
-			                          "and as a result will not be installed.");
-		} else {
-			logger.log(Level.INFO, "Attempting to install module.json.");
-			install(path);
+	private static void deleteRecursively(Path path) {
+		if (Files.isDirectory(path)) {
+			Stream<Path> stream = list(path);
+			List<Path> children = stream.collect(Collectors.toList());
+			for (Path child : children) {
+				deleteRecursively(child);
+			}
 		}
+		deleteLogged(path);
 	}
 
 	private static boolean hasBeenCreated(Path path) {
@@ -84,6 +88,20 @@ public class Main {
 			logger.log(Level.WARNING, "Failed to create module.json.", e);
 			return false;
 		}
+	}
+
+	private static Stream<Path> list(Path path) {
+		Stream<Path> stream = null;
+		try {
+			stream = Files.list(path);
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Failed to find children of " + path, e);
+		}
+		return stream;
+	}
+
+	public static void main(String[] args) {
+		new Main().run();
 	}
 
 	private void install(Path path) {
@@ -106,36 +124,16 @@ public class Main {
 		}
 	}
 
-	private static void createTemplate(Path path) throws IOException {
-		String separator = System.lineSeparator();
-		String formattedTemplate = MessageFormat.format(TEMPLATE, separator);
-		Files.createFile(path);
-		Files.writeString(path, formattedTemplate);
-	}
+	private void run() {
+		deletePrevious();
 
-	private static void deleteFile(Path path) {
-		try {
-			Files.deleteIfExists(path);
-		} catch (IOException e) {
-			logger.log(Level.WARNING, "Failed to delete " + path, e);
-		}
-	}
-
-	private static void deletePrevious() {
-		logger.log(Level.INFO, "Deleting previous installed content.");
-		deleteRecursively(MODULES);
-		logger.log(Level.FINE, "Finished deleting previous content.");
-	}
-
-	private static void deleteRecursively(Path path) {
-		if (Files.isDirectory(path)) {
-			Stream<Path> stream = list(path);
-			List<Path> children = stream.collect(Collectors.toList());
-			for (Path child : children) {
-				deleteRecursively(child);
-			}
+		Path path = Paths.get(".", "module.json");
+		if (hasBeenCreated(path)) {
+			logger.log(Level.WARNING, "The template for module.json has been created " +
+			                          "and as a result will not be installed.");
 		} else {
-			deleteFile(path);
+			logger.log(Level.INFO, "Attempting to install module.json.");
+			install(path);
 		}
 	}
 }
