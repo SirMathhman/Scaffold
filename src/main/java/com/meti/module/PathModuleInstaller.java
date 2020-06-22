@@ -1,8 +1,10 @@
-package com.meti.source;
+package com.meti.module;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.meti.module.Module;
 import com.meti.module.*;
+import com.meti.source.Source;
+import com.meti.source.SourceFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

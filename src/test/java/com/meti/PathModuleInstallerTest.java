@@ -3,7 +3,7 @@ package com.meti;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meti.module.Module;
 import com.meti.module.*;
-import com.meti.source.PathModuleInstaller;
+import com.meti.module.PathModuleInstaller;
 import com.meti.source.URLSourceFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
