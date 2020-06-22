@@ -36,4 +36,9 @@ public class PathSource implements Source {
 		}
 		return String.join("\\", names);
 	}
+
+	@Override
+	public String toString() {
+		return child.toString();
+	}
 }

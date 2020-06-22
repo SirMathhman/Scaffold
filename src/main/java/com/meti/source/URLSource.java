@@ -31,4 +31,9 @@ public class URLSource implements Source {
 		String formatSlashes = path.replace('/', '\\');
 		return formatSlashes.substring(1);
 	}
+
+	@Override
+	public String toString() {
+		return url.toString();
+	}
 }
