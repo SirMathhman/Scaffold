@@ -4,12 +4,16 @@
   "version": "0.1",
   "description": "Hopefully the simplest package manager to exist.",
   "content": [
-    {
-      "type": "path",
-      "value": "out\\artifacts\\Scaffold_jar\\Scaffold.jar"
-    }
   ],
   "dependencies": [
+    {
+      "type": "url",
+      "value": "https://github.com/SirMathhman/Scaffold-Java-Compile/releases/download/0.2/module.json"
+    },
+    {
+      "type": "url",
+      "value": "https://github.com/SirMathhman/Scaffold-JAR/releases/download/0.2/module.json"
+    }
   ],
   "install": []
 }
