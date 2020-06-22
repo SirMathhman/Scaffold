@@ -158,7 +158,7 @@ public class PathModuleInstaller implements ModuleInstaller {
 		Path other = directory.resolve(group).resolve(name);
 		if (!Files.exists(other)) return other;
 		throw new FormattingException(format("A module at {0} already exists.", other.toAbsolutePath()));
-	}F
+	}
 
 	private void transferContentToPath(Path child, Object content) throws InstallException {
 		Map<?, ?> map = (Map<?, ?>) content;
