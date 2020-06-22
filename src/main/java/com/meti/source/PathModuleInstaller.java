@@ -1,8 +1,8 @@
 package com.meti.source;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.meti.module.*;
 import com.meti.module.Module;
+import com.meti.module.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,7 +16,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import static com.meti.module.ModuleEntry.*;
+import static com.meti.module.ModuleEntry.CONTENT;
+import static com.meti.module.ModuleEntry.DEPENDENCIES;
 import static com.meti.module.ModuleList.INSTALL;
 import static com.meti.module.ModuleProperty.GROUP;
 import static com.meti.module.ModuleProperty.NAME;
@@ -29,6 +30,14 @@ public class PathModuleInstaller implements ModuleInstaller {
 	public PathModuleInstaller(Path directory, Map<String, SourceFactory> sourceFactories) {
 		this.directory = directory;
 		this.sourceFactories = Collections.unmodifiableMap(sourceFactories);
+	}
+
+	private static String castAsString(Object value) {
+		if (value instanceof String) {
+			return value.toString();
+		} else {
+			throw new IllegalArgumentException(String.format("%s is not a string.", value));
+		}
 	}
 
 	private static void createProcess(String command, ByteArrayOutputStream outputStream,
@@ -149,20 +158,12 @@ public class PathModuleInstaller implements ModuleInstaller {
 		Path other = directory.resolve(group).resolve(name);
 		if (!Files.exists(other)) return other;
 		throw new FormattingException(format("A module at {0} already exists.", other.toAbsolutePath()));
-	}
-
-	private static String castAsString(Object value) {
-		if(value instanceof String) {
-			return value.toString();
-		} else {
-			throw new IllegalArgumentException(String.format("%s is not a string.", value));
-		}
-	}
+	}F
 
 	private void transferContentToPath(Path child, Object content) throws InstallException {
-		Map<?, ?> node = (Map<?, ?>) content;
-		Object typeObject = node.get("type");
-		Object valueObject = node.get("value");
+		Map<?, ?> map = (Map<?, ?>) content;
+		Object typeObject = castAsString(map.get("type"));
+		Object valueObject = castAsString(map.get("value"));
 		String type = castAsString(typeObject);
 		String value = castAsString(valueObject);
 		try (Source source = sourceFactories.get(type).from(value)) {
