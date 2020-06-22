@@ -9,6 +9,7 @@ import com.meti.source.URLSourceFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.MessageFormat;
@@ -80,6 +81,16 @@ public class Main {
 		loadSettings();
 		deletePrevious();
 		install();
+		storeSettings();
+	}
+
+	private void storeSettings() {
+		logger.log(Level.FINE, "Storing properties at " + PROPERTIES);
+		try (OutputStream output = Files.newOutputStream(PROPERTIES)) {
+			properties.store(output, "");
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Failed to store properties.", e);
+		}
 	}
 
 	private static void setupLogger() {
@@ -110,6 +121,7 @@ public class Main {
 				.map(Level::parse)
 				.orElse(Level.ALL);
 		logger.setLevel(level);
+		properties.setProperty("Log Level", level.getName());
 	}
 
 	private static void deletePrevious() {
@@ -133,7 +145,7 @@ public class Main {
 		}
 	}
 
-	private Optional<String> getProperty(Properties properties, String key) {
+	private static Optional<String> getProperty(Properties properties, String key) {
 		return Optional.ofNullable(properties.getProperty(key));
 	}
 
