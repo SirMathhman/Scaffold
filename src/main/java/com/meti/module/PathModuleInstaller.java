@@ -1,6 +1,5 @@
 package com.meti.module;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.meti.source.Source;
 import com.meti.source.SourceFactory;
 
@@ -115,16 +114,15 @@ public class PathModuleInstaller implements ModuleInstaller {
 	}
 
 	private void installDependencies(Module module, ModuleLoader source) throws InstallException {
-		Collection<?> dependencies = module.getCollection(DEPENDENCIES);
-		for (Object dependency : dependencies) {
-			JsonNode node = (JsonNode) dependency;
-			installDependency(source, node);
+		Collection<Map<String, String>> dependencies = module.getCollection(DEPENDENCIES);
+		for (Map<String, String> dependency : dependencies) {
+			installDependency(source, dependency);
 		}
 	}
 
-	private void installDependency(ModuleLoader loader, JsonNode dependency) throws InstallException {
-		String type = dependency.get("type").asText();
-		String value = dependency.get("value").asText();
+	private void installDependency(ModuleLoader loader, Map<String, String> dependency) throws InstallException {
+		String type = dependency.get("type");
+		String value = dependency.get("value");
 		try (Source source = sourceFactories.get(type).from(value)) {
 			Module dependencyModule = loader.load(source.open());
 			install(dependencyModule, loader);
