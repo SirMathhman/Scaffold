@@ -1,8 +1,6 @@
 package com.meti.module;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.meti.module.Module;
-import com.meti.module.*;
 import com.meti.source.Source;
 import com.meti.source.SourceFactory;
 
@@ -17,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.meti.module.ModuleEntry.CONTENT;
 import static com.meti.module.ModuleEntry.DEPENDENCIES;
@@ -26,20 +26,13 @@ import static com.meti.module.ModuleProperty.NAME;
 import static java.text.MessageFormat.format;
 
 public class PathModuleInstaller implements ModuleInstaller {
+	private static final Logger logger = Logger.getLogger("Install");
 	private final Path directory;
 	private final Map<String, SourceFactory> sourceFactories;
 
 	public PathModuleInstaller(Path directory, Map<String, SourceFactory> sourceFactories) {
 		this.directory = directory;
 		this.sourceFactories = Collections.unmodifiableMap(sourceFactories);
-	}
-
-	private static String castAsString(Object value) {
-		if (value instanceof String) {
-			return value.toString();
-		} else {
-			throw new IllegalArgumentException(String.format("%s is not a string.", value));
-		}
 	}
 
 	private static void createProcess(String command, ByteArrayOutputStream outputStream,
@@ -96,7 +89,8 @@ public class PathModuleInstaller implements ModuleInstaller {
 	private static void transferStreamToPathExceptionally(InputStream stream, Path path) throws IOException {
 		ensure(path);
 		OutputStream out = Files.newOutputStream(path);
-		stream.transferTo(out);
+		long bytes = stream.transferTo(out);
+		logger.log(Level.FINEST, String.format("%d bytes were transferred.", bytes));
 		out.close();
 	}
 
@@ -116,6 +110,7 @@ public class PathModuleInstaller implements ModuleInstaller {
 	@Override
 	public String install(Module module, ModuleLoader source) throws InstallException {
 		String name = getName(module);
+		logger.log(Level.INFO, String.format("Installing %s", name));
 		return installWithName(module, source, name);
 	}
 
@@ -142,12 +137,15 @@ public class PathModuleInstaller implements ModuleInstaller {
 
 	private String installWithName(Module module, ModuleLoader source, String name) throws InstallException {
 		Path child = formatPath(module, name);
+		logger.log(Level.FINE, String.format("Setting module output to %s", child));
 		transferContents(module, child);
 		installDependencies(module, source);
-		Collection<?> commands = module.getList(INSTALL);
+		Collection<String> commands = module.getList(INSTALL);
+		logger.log(Level.INFO, String.format("Located %d commands to execute.", commands.size()));
 		Collection<String> items = new ArrayList<>();
-		for (Object command : commands) {
-			ByteArrayOutputStream outputStream = execute((String) command);
+		for (String command : commands) {
+			logger.log(Level.FINER, String.format("Executing command: %s", command));
+			ByteArrayOutputStream outputStream = execute(command);
 			String outputString = outputStream.toString();
 			if (!outputString.isBlank()) items.add(outputString);
 		}
@@ -162,22 +160,20 @@ public class PathModuleInstaller implements ModuleInstaller {
 		throw new FormattingException(format("A module at {0} already exists.", other.toAbsolutePath()));
 	}
 
-	private void transferContentToPath(Path child, Object content) throws InstallException {
-		Map<?, ?> map = (Map<?, ?>) content;
-		Object typeObject = castAsString(map.get("type"));
-		Object valueObject = castAsString(map.get("value"));
-		String type = castAsString(typeObject);
-		String value = castAsString(valueObject);
+	private void transferContentToPath(Path path, Map<String, String> content) throws InstallException {
+		String type = content.get("type");
+		String value = content.get("value");
 		try (Source source = sourceFactories.get(type).from(value)) {
-			transferSourceToPath(source, child);
+			logger.log(Level.FINE, String.format("Transferring contents of %s to %s", source, path));
+			transferSourceToPath(source, path);
 		} catch (IOException e) {
 			throw new InstallException(format("Failed to open {0}.", content), e);
 		}
 	}
 
 	private void transferContents(Module module, Path child) throws InstallException {
-		Collection<?> contents = module.getCollection(CONTENT);
-		for (Object content : contents) {
+		Collection<Map<String, String>> contents = module.getCollection(CONTENT);
+		for (Map<String, String> content : contents) {
 			transferContentToPath(child, content);
 		}
 	}
