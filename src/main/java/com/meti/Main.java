@@ -9,13 +9,11 @@ import com.meti.source.URLSourceFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.MessageFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -23,6 +21,7 @@ import java.util.stream.Stream;
 
 public class Main {
 	public static final Path MODULES = Paths.get(".", "modules");
+	public static final Path PROPERTIES = Paths.get(".", "config.properties");
 	public static final String TEMPLATE = "'{'" +
 	                                      "{0}  \"group\": ," +
 	                                      "{0}  \"name\": ," +
@@ -41,13 +40,7 @@ public class Main {
 			"url", new URLSourceFactory()
 	);
 	private final ModuleInstaller installer = new PathModuleInstaller(modules, sourceFactory);
-
-	private static void createTemplate(Path path) throws IOException {
-		String separator = System.lineSeparator();
-		String formattedTemplate = MessageFormat.format(TEMPLATE, separator);
-		Files.createFile(path);
-		Files.writeString(path, formattedTemplate);
-	}
+	private Properties properties = new Properties();
 
 	private static void deleteLogged(Path path) {
 		try {
@@ -55,12 +48,6 @@ public class Main {
 		} catch (IOException e) {
 			logger.log(Level.WARNING, "Failed to delete " + path, e);
 		}
-	}
-
-	private static void deletePrevious() {
-		logger.log(Level.INFO, "Deleting previous installed content.");
-		deleteRecursively(MODULES);
-		logger.log(Level.FINE, "Finished deleting previous content.");
 	}
 
 	private static void deleteRecursively(Path path) {
@@ -72,6 +59,82 @@ public class Main {
 			}
 		}
 		deleteLogged(path);
+	}
+
+	private static Stream<Path> list(Path path) {
+		Stream<Path> stream = null;
+		try {
+			stream = Files.list(path);
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Failed to find children of " + path, e);
+		}
+		return stream;
+	}
+
+	public static void main(String[] args) {
+		new Main().run();
+	}
+
+	private void run() {
+		setupLogger();
+		loadSettings();
+		deletePrevious();
+		install();
+	}
+
+	private static void setupLogger() {
+		logger.setUseParentHandlers(false);
+		ConsoleHandler handler = new ConsoleHandler();
+		handler.setLevel(Level.ALL);
+		logger.addHandler(handler);
+	}
+
+	private void loadSettings() {
+		if (!Files.exists(PROPERTIES)) {
+			logger.log(Level.WARNING, "Properties file does not exist. It will be created.");
+			try {
+				Files.createFile(PROPERTIES);
+			} catch (IOException e) {
+				logger.log(Level.WARNING, "Failed to create properties file.", e);
+			}
+		}
+		try (InputStream stream = Files.newInputStream(PROPERTIES)) {
+			logger.log(Level.FINE, "Loading in properties");
+			properties.load(stream);
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Failed to load properties from config file.", e);
+		}
+
+		Level level = getProperty(properties, "Log Level")
+				.map(s -> s.toUpperCase(Locale.ENGLISH))
+				.map(Level::parse)
+				.orElse(Level.ALL);
+		logger.setLevel(level);
+	}
+
+	private static void deletePrevious() {
+		logger.log(Level.INFO, "Deleting previous installed content.");
+		try {
+			Files.walkFileTree(MODULES, new DeleteFileVisitor());
+		} catch (IOException e) {
+			logger.log(Level.WARNING, String.format("Failed to walk file tree of %s", MODULES), e);
+		}
+		logger.log(Level.FINE, "Finished deleting previous content.");
+	}
+
+	private void install() {
+		Path path = Paths.get(".", "module.json");
+		if (hasBeenCreated(path)) {
+			logger.log(Level.WARNING, "The template for module.json has been created " +
+			                          "and as a result will not be installed.");
+		} else {
+			logger.log(Level.INFO, "Attempting to install module.json.");
+			install(path);
+		}
+	}
+
+	private Optional<String> getProperty(Properties properties, String key) {
+		return Optional.ofNullable(properties.getProperty(key));
 	}
 
 	private static boolean hasBeenCreated(Path path) {
@@ -88,20 +151,6 @@ public class Main {
 			logger.log(Level.WARNING, "Failed to create module.json.", e);
 			return false;
 		}
-	}
-
-	private static Stream<Path> list(Path path) {
-		Stream<Path> stream = null;
-		try {
-			stream = Files.list(path);
-		} catch (IOException e) {
-			logger.log(Level.WARNING, "Failed to find children of " + path, e);
-		}
-		return stream;
-	}
-
-	public static void main(String[] args) {
-		new Main().run();
 	}
 
 	private void install(Path path) {
@@ -124,16 +173,24 @@ public class Main {
 		}
 	}
 
-	private void run() {
-		deletePrevious();
+	private static void createTemplate(Path path) throws IOException {
+		String separator = System.lineSeparator();
+		String formattedTemplate = MessageFormat.format(TEMPLATE, separator);
+		Files.createFile(path);
+		Files.writeString(path, formattedTemplate);
+	}
 
-		Path path = Paths.get(".", "module.json");
-		if (hasBeenCreated(path)) {
-			logger.log(Level.WARNING, "The template for module.json has been created " +
-			                          "and as a result will not be installed.");
-		} else {
-			logger.log(Level.INFO, "Attempting to install module.json.");
-			install(path);
+	private static class DeleteFileVisitor extends SimpleFileVisitor<Path> {
+		@Override
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+			Files.delete(file);
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+			Files.delete(dir);
+			return FileVisitResult.CONTINUE;
 		}
 	}
 }
